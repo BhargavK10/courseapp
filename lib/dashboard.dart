@@ -1,52 +1,54 @@
-// import 'package:courseapp/main.dart';
-// import 'package:courseapp/titlebar.dart';
-// import 'package:flutter/material.dart';
-
-// class Dashboard extends StatelessWidget {
-//   const Dashboard({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: titleBar(),
-//       body: Center(
-//         child: Column(
-//           children: [
-//             Container(
-//               width: MediaQuery.of(context).size.width * 0.95,
-//               decoration: BoxDecoration(
-//                 color: secondaryColor,
-//                 borderRadius: BorderRadius.circular(10)
-//               ),
-//               child: Padding(
-//                 padding: EdgeInsetsGeometry.only(top: 10, bottom: 10, left: 10),
-//                 child: Text(
-//                   'Welcome <user here>',
-//                 ),
-//               )
-//             )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-import 'package:courseapp/createcourse.dart';
+import 'package:courseapp/addcourse.dart';
 import 'package:courseapp/drawermenu.dart';
-import 'package:courseapp/func.dart';
 import 'package:courseapp/topbar.dart';
-import 'package:courseapp/courses.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:courseapp/manageCourse.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final recentCourses = courses.take(3).toList(); // Show only the first 3 courses
+  State<Dashboard> createState() => _DashboardState();
+}
 
+class _DashboardState extends State<Dashboard> {
+  final supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> courses = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCourses();
+  }
+
+  Future<void> _fetchCourses() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await supabase
+          .from('courses')
+          .select()
+          .order('id', ascending: false)
+          .limit(3);
+
+      setState(() {
+        courses = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error loading courses: $e")));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: topBar(context, 'Dashboard'),
       drawer: DrawerMenu(),
@@ -55,18 +57,13 @@ class Dashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            Text(
-              "Welcome, $userName",
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold
-              ),
+            const Text(
+              "Welcome, Admin",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 10),
-            Divider(height: 1,),
-            
+            const Divider(height: 1),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -74,53 +71,65 @@ class Dashboard extends StatelessWidget {
                   "Recent Courses",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AllCoursesPage(courses: courses)
-                      ),
-                    );
-                  },
-                  child: const Text("Show All"),
-                ),
               ],
             ),
 
-            ...recentCourses.map((course) {
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                child: ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  title: Text(
-                    course["title"]!,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+            // ✅ Show Courses from Supabase
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (courses.isEmpty)
+              const Text("No courses available yet.")
+            else
+              ...courses.map((course) {
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  subtitle: Text(course["description"]!),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      // Navigate to edit/manage this course
-                    },
-                    child: Icon(Icons.settings),
-                  ),
-                ),
-              );
-            }),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    title: Text(
+                      course["title"] ?? "Untitled",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(course["description"] ?? ""),
+                    trailing: ElevatedButton(
+                      onPressed: () async {
+                        final updated = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CourseManagePage(course: course)
+                          ),
+                        );
 
+                        if (updated == true) {
+                          await _fetchCourses(); // refresh from DB
+                        }
+                      },
+                      child: const Icon(Icons.settings),
+                    ),
+                  ),
+                );
+              }),
+
+            // ✅ Add New Course button
             Padding(
-              padding: EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: 10),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_)=>CreateCourse()));
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddCoursePage()),
+                  );
+                  _fetchCourses();
                 },
                 child: Container(
                   height: 70,
-                  width: MediaQuery.of(context).size.width*0.92,
+                  width: MediaQuery.of(context).size.width * 0.92,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
@@ -128,28 +137,28 @@ class Dashboard extends StatelessWidget {
                         color: Colors.grey.withAlpha(127),
                         spreadRadius: 2,
                         blurRadius: 2,
-                        offset: Offset(0, 1),
+                        offset: const Offset(0, 1),
                       ),
                     ],
-                    color: Colors.blue.shade50
+                    color: Colors.blue.shade50,
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       '+',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 50,
-                        color: const Color.fromARGB(255, 161, 161, 161)
+                        color: Color.fromARGB(255, 161, 161, 161),
                       ),
-                    )
-                  )
-                  // Icon(CupertinoIcons.plus),
+                    ),
+                  ),
                 ),
-              )
+              ),
             ),
-            
+
             const SizedBox(height: 30),
 
+            // Statistics Card (dummy for now)
             GestureDetector(
               onTap: () {
                 // Navigate to statistics page
@@ -164,13 +173,17 @@ class Dashboard extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.bar_chart, size: 40, color: Colors.blue.shade700),
+                      Icon(
+                        Icons.bar_chart,
+                        size: 40,
+                        color: Colors.blue.shade700,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
+                          children: const [
+                            Text(
                               "View Statistics",
                               style: TextStyle(
                                 fontSize: 18,
@@ -178,16 +191,20 @@ class Dashboard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "Total Students: $totalStudents",
+                              "Total Students: 120", // can fetch from Supabase too
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade700,
+                                color: Colors.grey,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Icon(Icons.arrow_forward_ios,size: 18, color: Colors.blue.shade700),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 18,
+                        color: Colors.blue.shade700,
+                      ),
                     ],
                   ),
                 ),
@@ -195,7 +212,7 @@ class Dashboard extends StatelessWidget {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

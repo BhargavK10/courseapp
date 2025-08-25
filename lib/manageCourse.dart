@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'addVideo.dart';
 import 'editcourse.dart';
+import 'editVideo.dart';
 import 'videoPlayer.dart';
 
 class CourseManagePage extends StatefulWidget {
@@ -103,10 +104,7 @@ class _CourseManagePageState extends State<CourseManagePage> {
                     const SizedBox(height: 6),
                     Text(
                       course["description"] ?? "No description available",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -147,9 +145,9 @@ class _CourseManagePageState extends State<CourseManagePage> {
             Text(
               "🎬 Course Videos",
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 10),
 
@@ -176,10 +174,9 @@ class _CourseManagePageState extends State<CourseManagePage> {
                             contentPadding: const EdgeInsets.all(12),
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: video["thumbnail"] != null &&
-                                      video["thumbnail"]
-                                          .toString()
-                                          .isNotEmpty
+                              child:
+                                  video["thumbnail"] != null &&
+                                      video["thumbnail"].toString().isNotEmpty
                                   ? Image.network(
                                       video["thumbnail"],
                                       width: 70,
@@ -190,34 +187,64 @@ class _CourseManagePageState extends State<CourseManagePage> {
                                       width: 70,
                                       height: 50,
                                       color: Colors.grey.shade200,
-                                      child: const Icon(Icons.video_library,
-                                          size: 30, color: Colors.grey),
+                                      child: const Icon(
+                                        Icons.video_library,
+                                        size: 30,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                             ),
                             title: Text(
                               video["title"] ?? "Untitled",
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Text(
                               video["description"] ?? "No description",
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.play_circle_fill,
-                                  color: Colors.green, size: 32),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => VideoPlayerPage(
-                                      videoUrl: video["video_url"],
-                                      title: video["title"],
-                                    ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
                                   ),
-                                );
-                              },
+                                  onPressed: () async {
+                                    final updated = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            EditVideoPage(video: video),
+                                      ),
+                                    );
+                                    if (updated == true) {
+                                      _fetchVideos(); // refresh after edit/delete
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.play_circle_fill,
+                                    color: Colors.green,
+                                    size: 32,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => VideoPlayerPage(
+                                          videoUrl: video["video_url"],
+                                          title: video["title"],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         );

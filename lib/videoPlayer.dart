@@ -63,7 +63,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: const Color(0xFF2C3137),
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -103,7 +103,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     colors: VideoProgressColors(
                       playedColor: Colors.redAccent,
                       bufferedColor: Colors.grey,
-                      backgroundColor: Colors.black26,
+                      backgroundColor: Colors.blue
                     ),
                   ),
                 ],
@@ -113,7 +113,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
       floatingActionButton: (!_isYoutube && _isInitialized)
           ? FloatingActionButton(
-              backgroundColor: const Color(0xFF2C3137),
+              backgroundColor: Colors.blue,
               onPressed: () {
                 setState(() {
                   _videoController!.value.isPlaying

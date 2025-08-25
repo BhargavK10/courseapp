@@ -86,7 +86,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Course"),
-        backgroundColor: Color(0xFF2C3137),
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -140,18 +140,11 @@ class _EditCoursePageState extends State<EditCoursePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _thumbnailController,
-                decoration: const InputDecoration(
-                  labelText: "Thumbnail URL",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
+              
               ElevatedButton(
                 onPressed: _isLoading ? null : _updateCourse,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF2C3137),
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _isLoading

@@ -192,39 +192,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
                     hint: "Enter duration in months",
                     type: TextInputType.number,
                   ),
-                  const SizedBox(height: 20),
+                  
 
-                  // Pick Image Section
-                  Row(
-                    children: [
-                      _pickedImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                _pickedImage!,
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.image,
-                                  color: Colors.grey, size: 40),
-                            ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text("Pick Thumbnail"),
-                      ),
-                    ],
-                  ),
+                  
 
                   const SizedBox(height: 24),
 

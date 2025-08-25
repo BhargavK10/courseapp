@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Attendance App',
       debugShowCheckedModeBanner: false,
       title: 'Course App',
       theme: ThemeData(
@@ -35,3 +36,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

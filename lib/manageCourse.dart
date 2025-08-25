@@ -52,9 +52,10 @@ class _CourseManagePageState extends State<CourseManagePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text(course["title"] ?? "Manage Course"),
-        backgroundColor: const Color(0xFF2C3137),
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -77,19 +78,41 @@ class _CourseManagePageState extends State<CourseManagePage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              "Course: ${course["title"] ?? "Untitled"}",
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            // Course Info Card
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      course["title"] ?? "Untitled Course",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      course["description"] ?? "No description available",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              course["description"] ?? "",
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
+
             const SizedBox(height: 20),
 
             // Add Video Button
@@ -105,45 +128,85 @@ class _CourseManagePageState extends State<CourseManagePage> {
                   _fetchVideos(); // refresh list
                 }
               },
-              icon: const Icon(Icons.add),
-              label: const Text("Add Video"),
+              icon: const Icon(Icons.add, size: 22),
+              label: const Text(
+                "Add New Video",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: const Color(0xFF2C3137),
+                backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
 
             const SizedBox(height: 20),
-            const Text(
-              "Videos",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              "🎬 Course Videos",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
             ),
             const SizedBox(height: 10),
 
+            // Video List
             Expanded(
               child: videos.isEmpty
-                  ? const Center(child: Text("No videos yet"))
+                  ? const Center(
+                      child: Text(
+                        "No videos added yet",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: videos.length,
                       itemBuilder: (context, index) {
                         final video = videos[index];
                         return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
                           child: ListTile(
-                            leading: video["thumbnail"] != null &&
-                                    video["thumbnail"].toString().isNotEmpty
-                                ? Image.network(video["thumbnail"],
-                                    width: 60, fit: BoxFit.cover)
-                                : const Icon(Icons.video_library, size: 40),
-                            title: Text(video["title"] ?? "Untitled"),
-                            subtitle:
-                                Text(video["description"] ?? "No description"),
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: video["thumbnail"] != null &&
+                                      video["thumbnail"]
+                                          .toString()
+                                          .isNotEmpty
+                                  ? Image.network(
+                                      video["thumbnail"],
+                                      width: 70,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      width: 70,
+                                      height: 50,
+                                      color: Colors.grey.shade200,
+                                      child: const Icon(Icons.video_library,
+                                          size: 30, color: Colors.grey),
+                                    ),
+                            ),
+                            title: Text(
+                              video["title"] ?? "Untitled",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              video["description"] ?? "No description",
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.play_arrow,
-                                  color: Colors.green),
+                              icon: const Icon(Icons.play_circle_fill,
+                                  color: Colors.green, size: 32),
                               onPressed: () {
                                 Navigator.push(
                                   context,

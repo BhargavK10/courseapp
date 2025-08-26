@@ -29,7 +29,7 @@ class _AttendancePageState extends State<AttendancePage> {
     });
   }
 
-  Future<void> _markAttendance(String studentId, bool isPresent) async {
+  Future<void> _markAttendance(String studentId, String batchId, bool isPresent) async {
     final todayDate = "${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
 
     // Check if entry exists
@@ -52,6 +52,7 @@ class _AttendancePageState extends State<AttendancePage> {
       // Insert
       await supabase.from('attendance').insert({
         'student_id': studentId,
+        'batch':batchId,
         'date': todayDate,
         'present': isPresent,
       });
@@ -86,11 +87,11 @@ class _AttendancePageState extends State<AttendancePage> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.check, color: Colors.green),
-                  onPressed: () => _markAttendance(student['user_id'], true),
+                  onPressed: () => _markAttendance(student['user_id'], student['batch'], true),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.red),
-                  onPressed: () => _markAttendance(student['user_id'], false),
+                  onPressed: () => _markAttendance(student['user_id'], student['batch'], false),
                 ),
               ],
             ),

@@ -1,4 +1,6 @@
 import 'package:courseapp/addcourse.dart';
+import 'package:courseapp/attendancedashboard.dart';
+import 'package:courseapp/attendencepage.dart';
 import 'package:courseapp/drawermenu.dart';
 import 'package:courseapp/topbar.dart';
 import 'package:courseapp/manageCourse.dart';
@@ -196,7 +198,7 @@ class _DashboardState extends State<Dashboard> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
                 onTap: () {
-                  // Navigate to stats page
+                  Navigator.push(context, MaterialPageRoute(builder: (_)=>AttendanceDashboard()));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(18),
@@ -217,7 +219,7 @@ class _DashboardState extends State<Dashboard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              "View Statistics",
+                              "Attendance",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

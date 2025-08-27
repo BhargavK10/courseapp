@@ -25,7 +25,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
   bool _isLoading = false;
 
-  // 🔑 Internet Archive credentials
+
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
 
@@ -36,7 +36,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-  /// Upload image to Internet Archive
+
   Future<String?> _uploadToInternetArchive(File file) async {
     try {
       final identifier = "course_${DateTime.now().millisecondsSinceEpoch}";
@@ -159,7 +159,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Thumbnail picker
+                
                   GestureDetector(
                     onTap: _pickThumbnail,
                     child: Container(

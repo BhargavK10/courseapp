@@ -24,9 +24,9 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
   File? _thumbnailImage;
   final ImagePicker _picker = ImagePicker();
 
-  bool _isLoading = false; // ✅ Loading flag
+  bool _isLoading = false;
 
-  // 🔑 Internet Archive Credentials
+  
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
 
@@ -70,7 +70,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
 
   Future<void> _saveSubcourse() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true); // ✅ Start loading
+      setState(() => _isLoading = true); 
       try {
         String? uploadedUrl;
 
@@ -104,7 +104,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
           );
         }
       } finally {
-        if (mounted) setState(() => _isLoading = false); // ✅ Stop loading
+        if (mounted) setState(() => _isLoading = false); 
       }
     }
   }
@@ -160,7 +160,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Thumbnail picker
+                 
                   GestureDetector(
                     onTap: _pickThumbnail,
                     child: Container(
@@ -205,7 +205,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveSubcourse, // ✅ disable while loading
+                      onPressed: _isLoading ? null : _saveSubcourse, 
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,

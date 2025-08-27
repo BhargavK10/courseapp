@@ -25,7 +25,7 @@ class _EditVideoPageState extends State<EditVideoPage> {
     isPaid = widget.video["is_paid"] ?? false;
   }
 
-  /// Update video in Supabase
+  
   Future<void> _updateVideo() async {
     setState(() => isLoading = true);
     try {
@@ -43,7 +43,7 @@ class _EditVideoPageState extends State<EditVideoPage> {
         throw "Update failed. No row updated.";
       }
 
-      if (mounted) Navigator.pop(context, true); // return success
+      if (mounted) Navigator.pop(context, true); 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error updating video: $e")),
@@ -79,7 +79,7 @@ class _EditVideoPageState extends State<EditVideoPage> {
             .from("Videos")
             .delete()
             .eq("id", widget.video["id"]);
-        if (mounted) Navigator.pop(context, true); // return success
+        if (mounted) Navigator.pop(context, true); 
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error deleting video: $e")),

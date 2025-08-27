@@ -69,7 +69,7 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
           ),
         );
         if (updated == true) {
-          _fetchSubcourse(); // refresh details
+          _fetchSubcourse(); 
         }
       },
     ),
@@ -81,7 +81,7 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Subcourse Info Card
+          
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -111,7 +111,7 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
 
             const SizedBox(height: 20),
 
-            // Add Video Button
+           
             ElevatedButton.icon(
               onPressed: () async {
                 final added = await Navigator.push(
@@ -124,7 +124,7 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
                   ),
                 );
                 if (added == true) {
-                  _fetchVideos(); // refresh list
+                  _fetchVideos(); 
                 }
               },
               icon: const Icon(Icons.add, size: 22),

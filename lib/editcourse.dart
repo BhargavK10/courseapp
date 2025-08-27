@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditCoursePage extends StatefulWidget {
-  final Map<String, dynamic> course; // Pass the course object
+  final Map<String, dynamic> course; 
 
   const EditCoursePage({super.key, required this.course});
 
@@ -59,7 +59,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
             'Thumbnail': _thumbnailController.text.trim(),
           })
           .eq("id", widget.course["id"].toString().trim())
-          .select(); // ✅ This makes Supabase return the updated row(s)
+          .select(); 
 
       setState(() => _isLoading = false);
 
@@ -71,7 +71,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Course updated successfully!")),
         );
-        Navigator.pop(context, true); // send result back to refresh list
+        Navigator.pop(context, true); 
       }
     } catch (e) {
       setState(() => _isLoading = false);

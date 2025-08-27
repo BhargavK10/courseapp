@@ -111,7 +111,7 @@ class _CourseManagePageState extends State<CourseManagePage> {
 
             const SizedBox(height: 20),
 
-            // Add Subcourse Button
+           
             ElevatedButton.icon(
               onPressed: () async {
                 final added = await Navigator.push(
@@ -122,7 +122,7 @@ class _CourseManagePageState extends State<CourseManagePage> {
                   ),
                 );
                 if (added == true) {
-                  _fetchSubcourses(); // refresh list
+                  _fetchSubcourses(); 
                 }
               },
               icon: const Icon(Icons.add, size: 22),
@@ -150,7 +150,7 @@ class _CourseManagePageState extends State<CourseManagePage> {
             ),
             const SizedBox(height: 10),
 
-            // Subcourse List
+           
             Expanded(
               child: subcourses.isEmpty
                   ? const Center(

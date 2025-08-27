@@ -503,8 +503,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 
 class AddVideoPage extends StatefulWidget {
-  final String subcourseId;  // ✅ use String for UUID
-  final String courseId;     // ✅ if you also need courseId separately
+  final String subcourseId;  
+  final String courseId;     
 
   const AddVideoPage({
     Key? key,
@@ -529,7 +529,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
   final _formKey = GlobalKey<FormState>();
   final picker = ImagePicker();
 
-  // 🔑 Internet Archive Credentials (replace with yours)
+  
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
 
@@ -570,7 +570,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         url,
         headers: {
           "authorization": "LOW $accessKey:$secretKey",
-          "x-archive-auto-make-bucket": "1", // auto create bucket if not exists
+          "x-archive-auto-make-bucket": "1",
           "Content-Type": isVideo ? "video/mp4" : "image/jpeg",
         },
         body: bytes,
@@ -599,7 +599,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
     setState(() => _isUploading = true);
 
     try {
-      // Upload video & thumbnail to Internet Archive
+      
       final videoUrl = await _uploadToInternetArchive(
         _videoFile!,
         isVideo: true,
@@ -610,12 +610,11 @@ class _AddVideoPageState extends State<AddVideoPage> {
 
       if (videoUrl == null) throw "Video upload failed";
 
-      // Get next index from Supabase
-      // Get next index from Supabase
+     
       final maxIndexResponse = await Supabase.instance.client
           .from('Videos')
           .select('index')
-          .eq('subcourse_id', widget.subcourseId) // ✅ changed to subcourse_id
+          .eq('subcourse_id', widget.subcourseId) 
           .order('index', ascending: false)
           .limit(1);
 
@@ -629,7 +628,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         'title': _titleController.text,
         'description': _descController.text,
         'video_url': videoUrl,
-        'subcourse_id': widget.subcourseId, // ✅ use subcourse_id
+        'subcourse_id': widget.subcourseId, 
         'is_paid': _isPaid,
         'thumbnail': thumbUrl,
         'index': nextIndex,

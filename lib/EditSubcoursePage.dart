@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditSubcoursePage extends StatefulWidget {
-  final Map<String, dynamic> subcourse; // ✅ Pass full subcourse data
+  final Map<String, dynamic> subcourse; 
 
   const EditSubcoursePage({super.key, required this.subcourse});
 
@@ -103,7 +103,7 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
               "validity_months": int.tryParse(validityController.text) ?? 0,
               "Thumbnail": uploadedUrl ?? "",
             })
-            .eq("id", widget.subcourse['id']); // ✅ Update specific row
+            .eq("id", widget.subcourse['id']); 
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -56,7 +56,7 @@ class DrawerMenu extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          Divider(color: Colors.grey[700]),*/
+          Divider(color: Colors.grey[700]),
           ListTile(
             leading: Icon(Icons.settings, color: Color(0xFF242424)),
             title: Text('Settings', style: TextStyle(color: Color(0xFF242424))),
@@ -68,7 +68,7 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.logout, color: const Color(0xFFDB3939)),
             title: Text('Logout', style: TextStyle(color: Color(0xFFDB3939))),
             onTap: signOut,
-          ),
+          ),*/
         ],
       ),
     );

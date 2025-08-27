@@ -224,13 +224,6 @@ class _DashboardState extends State<Dashboard> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              "Total Students: 120",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
                           ],
                         ),
                       ),

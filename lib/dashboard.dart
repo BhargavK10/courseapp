@@ -188,6 +188,62 @@ class _DashboardState extends State<Dashboard> {
             // Add New Course Button
             const SizedBox(height: 16),
 
+            Card(
+              color: Colors.indigo.shade50,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_)=>AttendanceDashboard()));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.indigo.shade100,
+                        radius: 28,
+                        child: Icon(
+                          Icons.bar_chart,
+                          size: 30,
+                          color: Colors.indigo.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Attendance",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "Total Students: 120",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 18,
+                        color: Colors.indigo.shade700,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

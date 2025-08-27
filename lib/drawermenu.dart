@@ -1,5 +1,5 @@
 import 'package:courseapp/dashboard.dart';
-import 'package:courseapp/func.dart';
+import 'package:courseapp/viewAll.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -39,7 +39,7 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.book, color: Color(0xFF242424)),
             title: Text('Courses', style: TextStyle(color: Color(0xFF242424))),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>AllCoursesPage(courses: courses)));
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>AllCoursesPage()));
             },
           ),
           ListTile(

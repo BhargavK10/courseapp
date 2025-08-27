@@ -1,4 +1,6 @@
 import 'package:courseapp/addcourse.dart';
+import 'package:courseapp/attendancedashboard.dart';
+import 'package:courseapp/attendencepage.dart';
 import 'package:courseapp/drawermenu.dart';
 import 'package:courseapp/topbar.dart';
 import 'package:courseapp/manageCourse.dart';

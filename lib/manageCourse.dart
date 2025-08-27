@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'addVideo.dart';
+import 'AddSubcourse.dart';
 import 'editcourse.dart';
-import 'editVideo.dart';
-import 'videoPlayer.dart';
+import 'subcourseManagePage.dart';
 
 class CourseManagePage extends StatefulWidget {
   final Map<String, dynamic> course;
@@ -16,13 +15,13 @@ class CourseManagePage extends StatefulWidget {
 
 class _CourseManagePageState extends State<CourseManagePage> {
   late Map<String, dynamic> course;
-  List<Map<String, dynamic>> videos = [];
+  List<Map<String, dynamic>> subcourses = [];
 
   @override
   void initState() {
     super.initState();
     course = widget.course;
-    _fetchVideos();
+    _fetchSubcourses();
   }
 
   Future<void> _fetchCourses() async {
@@ -38,15 +37,14 @@ class _CourseManagePageState extends State<CourseManagePage> {
     }
   }
 
-  Future<void> _fetchVideos() async {
+  Future<void> _fetchSubcourses() async {
     final response = await Supabase.instance.client
-        .from("Videos")
+        .from("subcourses")
         .select()
-        .eq("course_id", course["id"])
-        .order("index", ascending: true);
+        .eq("course_id", course["id"]);
 
     setState(() {
-      videos = List<Map<String, dynamic>>.from(response);
+      subcourses = List<Map<String, dynamic>>.from(response);
     });
   }
 
@@ -113,22 +111,23 @@ class _CourseManagePageState extends State<CourseManagePage> {
 
             const SizedBox(height: 20),
 
-            // Add Video Button
+            // Add Subcourse Button
             ElevatedButton.icon(
               onPressed: () async {
                 final added = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AddVideoPage(courseId: course["id"]),
+                    builder: (_) => AddSubcoursePage(courseId: course["id"].toString()),
+
                   ),
                 );
                 if (added == true) {
-                  _fetchVideos(); // refresh list
+                  _fetchSubcourses(); // refresh list
                 }
               },
               icon: const Icon(Icons.add, size: 22),
               label: const Text(
-                "Add New Video",
+                "Add New Subcourse",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
@@ -143,7 +142,7 @@ class _CourseManagePageState extends State<CourseManagePage> {
 
             const SizedBox(height: 20),
             Text(
-              "🎬 Course Videos",
+              "📚 Subcourses",
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
@@ -151,19 +150,19 @@ class _CourseManagePageState extends State<CourseManagePage> {
             ),
             const SizedBox(height: 10),
 
-            // Video List
+            // Subcourse List
             Expanded(
-              child: videos.isEmpty
+              child: subcourses.isEmpty
                   ? const Center(
                       child: Text(
-                        "No videos added yet",
+                        "No subcourses added yet",
                         style: TextStyle(color: Colors.grey),
                       ),
                     )
                   : ListView.builder(
-                      itemCount: videos.length,
+                      itemCount: subcourses.length,
                       itemBuilder: (context, index) {
-                        final video = videos[index];
+                        final sub = subcourses[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -175,77 +174,49 @@ class _CourseManagePageState extends State<CourseManagePage> {
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child:
-                                  video["thumbnail"] != null &&
-                                      video["thumbnail"].toString().isNotEmpty
-                                  ? Image.network(
-                                      video["thumbnail"],
-                                      width: 70,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Container(
-                                      width: 70,
-                                      height: 50,
-                                      color: Colors.grey.shade200,
-                                      child: const Icon(
-                                        Icons.video_library,
-                                        size: 30,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                                  sub["Thumbnail"] != null &&
+                                          sub["Thumbnail"].toString().isNotEmpty
+                                      ? Image.network(
+                                          sub["Thumbnail"],
+                                          width: 70,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(
+                                          width: 70,
+                                          height: 50,
+                                          color: Colors.grey.shade200,
+                                          child: const Icon(
+                                            Icons.book,
+                                            size: 30,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                             ),
                             title: Text(
-                              video["title"] ?? "Untitled",
+                              sub["title"] ?? "Untitled",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             subtitle: Text(
-                              video["description"] ?? "No description",
+                              sub["description"] ?? "No description",
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () async {
-                                    final updated = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            EditVideoPage(video: video),
-                                      ),
-                                    );
-                                    if (updated == true) {
-                                      _fetchVideos(); // refresh after edit/delete
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.play_circle_fill,
-                                    color: Colors.green,
-                                    size: 32,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => VideoPlayerPage(
-                                          videoUrl: video["video_url"],
-                                          title: video["title"],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.blue,
                             ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      SubcourseManagePage(subcourse: sub),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },

@@ -503,13 +503,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 
 class AddVideoPage extends StatefulWidget {
-  final String courseId;
+  final String subcourseId;  // ✅ use String for UUID
+  final String courseId;     // ✅ if you also need courseId separately
 
-  const AddVideoPage({super.key, required this.courseId});
+  const AddVideoPage({
+    Key? key,
+    required this.subcourseId,
+    required this.courseId,
+  }) : super(key: key);
 
   @override
   State<AddVideoPage> createState() => _AddVideoPageState();
 }
+
 
 class _AddVideoPageState extends State<AddVideoPage> {
   final _titleController = TextEditingController();
@@ -526,7 +532,6 @@ class _AddVideoPageState extends State<AddVideoPage> {
   // 🔑 Internet Archive Credentials (replace with yours)
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
-  
 
   @override
   void dispose() {
@@ -606,10 +611,11 @@ class _AddVideoPageState extends State<AddVideoPage> {
       if (videoUrl == null) throw "Video upload failed";
 
       // Get next index from Supabase
+      // Get next index from Supabase
       final maxIndexResponse = await Supabase.instance.client
           .from('Videos')
           .select('index')
-          .eq('course_id', widget.courseId)
+          .eq('subcourse_id', widget.subcourseId) // ✅ changed to subcourse_id
           .order('index', ascending: false)
           .limit(1);
 
@@ -623,7 +629,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         'title': _titleController.text,
         'description': _descController.text,
         'video_url': videoUrl,
-        'course_id': widget.courseId,
+        'subcourse_id': widget.subcourseId, // ✅ use subcourse_id
         'is_paid': _isPaid,
         'thumbnail': thumbUrl,
         'index': nextIndex,
@@ -753,4 +759,3 @@ class _AddVideoPageState extends State<AddVideoPage> {
     );
   }
 }
-

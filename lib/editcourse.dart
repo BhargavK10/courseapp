@@ -53,7 +53,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
           .update({
             'title': _titleController.text.trim(),
             'description': _descController.text.trim(),
-            'price': double.tryParse(_priceController.text) ?? 0,
+            'price': int.tryParse(_priceController.text.trim()) ?? 0,
             'host': _hostController.text.trim(),
             'validity_months': int.tryParse(_validityController.text) ?? 0,
             'Thumbnail': _thumbnailController.text.trim(),

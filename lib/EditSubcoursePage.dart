@@ -4,30 +4,43 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AddCoursePage extends StatefulWidget {
-  const AddCoursePage({Key? key}) : super(key: key);
+class EditSubcoursePage extends StatefulWidget {
+  final Map<String, dynamic> subcourse; // ✅ Pass full subcourse data
+
+  const EditSubcoursePage({super.key, required this.subcourse});
 
   @override
-  State<AddCoursePage> createState() => _AddCoursePageState();
+  State<EditSubcoursePage> createState() => _EditSubcoursePageState();
 }
 
-class _AddCoursePageState extends State<AddCoursePage> {
+class _EditSubcoursePageState extends State<EditSubcoursePage> {
   final _formKey = GlobalKey<FormState>();
-
-  final titleController = TextEditingController();
-  final descController = TextEditingController();
-  final priceController = TextEditingController();
-  final hostController = TextEditingController();
-  final validityController = TextEditingController();
+  late TextEditingController titleController;
+  late TextEditingController descController;
+  late TextEditingController priceController;
+  late TextEditingController hostController;
+  late TextEditingController validityController;
 
   File? _thumbnailImage;
   final ImagePicker _picker = ImagePicker();
 
   bool _isLoading = false;
 
-  // 🔑 Internet Archive credentials
+  // 🔑 Internet Archive Credentials
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ Pre-fill controllers with existing data
+    titleController = TextEditingController(text: widget.subcourse['title'] ?? '');
+    descController = TextEditingController(text: widget.subcourse['description'] ?? '');
+    priceController = TextEditingController(text: widget.subcourse['price']?.toString() ?? '');
+    hostController = TextEditingController(text: widget.subcourse['host'] ?? '');
+    validityController =
+        TextEditingController(text: widget.subcourse['validity_months']?.toString() ?? '');
+  }
 
   Future<void> _pickThumbnail() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -36,10 +49,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-  /// Upload image to Internet Archive
   Future<String?> _uploadToInternetArchive(File file) async {
     try {
-      final identifier = "course_${DateTime.now().millisecondsSinceEpoch}";
+      final identifier = "subcourse_${DateTime.now().millisecondsSinceEpoch}";
       final fileName = file.uri.pathSegments.last;
 
       final url = Uri.parse("https://s3.us.archive.org/$identifier/$fileName");
@@ -67,11 +79,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-  Future<void> _saveCourse() async {
+  Future<void> _updateSubcourse() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+
       try {
-        String? uploadedUrl;
+        String? uploadedUrl = widget.subcourse['Thumbnail'];
 
         if (_thumbnailImage != null) {
           uploadedUrl = await _uploadToInternetArchive(_thumbnailImage!);
@@ -80,19 +93,21 @@ class _AddCoursePageState extends State<AddCoursePage> {
           }
         }
 
-        await Supabase.instance.client.from("courses").insert({
-          "title": titleController.text.trim(),
-          "description": descController.text.trim(),
-          "price": int.tryParse(priceController.text) ?? 0,
-          "host": hostController.text.trim(),
-          "validity_months": int.tryParse(validityController.text) ?? 0,
-          "Thumbnail": uploadedUrl ?? "",
-          "purchase_count": 0,
-        });
+        await Supabase.instance.client
+            .from("subcourses")
+            .update({
+              "title": titleController.text.trim(),
+              "description": descController.text.trim(),
+              "price": int.tryParse(priceController.text) ?? 0,
+              "host": hostController.text.trim(),
+              "validity_months": int.tryParse(validityController.text) ?? 0,
+              "Thumbnail": uploadedUrl ?? "",
+            })
+            .eq("id", widget.subcourse['id']); // ✅ Update specific row
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Course saved successfully!")),
+            const SnackBar(content: Text("✅ Subcourse updated successfully!")),
           );
           Navigator.pop(context, true);
         }
@@ -142,7 +157,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text("➕ Add Course"),
+        title: const Text("✏️ Edit Subcourse"),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -159,7 +174,6 @@ class _AddCoursePageState extends State<AddCoursePage> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Thumbnail picker
                   GestureDetector(
                     onTap: _pickThumbnail,
                     child: Container(
@@ -173,20 +187,27 @@ class _AddCoursePageState extends State<AddCoursePage> {
                       child: _thumbnailImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.file(_thumbnailImage!,
-                                  fit: BoxFit.cover),
+                              child: Image.file(_thumbnailImage!, fit: BoxFit.cover),
                             )
-                          : const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.image,
-                                      size: 50, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text("Tap to pick thumbnail"),
-                                ],
-                              ),
-                            ),
+                          : (widget.subcourse['Thumbnail'] != null &&
+                                  widget.subcourse['Thumbnail'].toString().isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.network(
+                                    widget.subcourse['Thumbnail'],
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.image, size: 50, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text("Tap to change thumbnail"),
+                                    ],
+                                  ),
+                                ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -195,8 +216,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   const SizedBox(height: 14),
                   _buildTextField(descController, "Description", maxLines: 3),
                   const SizedBox(height: 14),
-                  _buildTextField(priceController, "Price",
-                      type: TextInputType.number),
+                  _buildTextField(priceController, "Price", type: TextInputType.number),
                   const SizedBox(height: 14),
                   _buildTextField(hostController, "Host"),
                   const SizedBox(height: 14),
@@ -207,7 +227,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveCourse,
+                      onPressed: _isLoading ? null : _updateSubcourse,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -231,7 +251,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                                 Icon(Icons.save),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Save Course",
+                                  "Update Subcourse",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

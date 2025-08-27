@@ -4,16 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AddCoursePage extends StatefulWidget {
-  const AddCoursePage({Key? key}) : super(key: key);
+class AddSubcoursePage extends StatefulWidget {
+  final String courseId;
+
+  const AddSubcoursePage({super.key, required this.courseId});
 
   @override
-  State<AddCoursePage> createState() => _AddCoursePageState();
+  State<AddSubcoursePage> createState() => _AddSubcoursePageState();
 }
 
-class _AddCoursePageState extends State<AddCoursePage> {
+class _AddSubcoursePageState extends State<AddSubcoursePage> {
   final _formKey = GlobalKey<FormState>();
-
   final titleController = TextEditingController();
   final descController = TextEditingController();
   final priceController = TextEditingController();
@@ -23,9 +24,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
   File? _thumbnailImage;
   final ImagePicker _picker = ImagePicker();
 
-  bool _isLoading = false;
+  bool _isLoading = false; // ✅ Loading flag
 
-  // 🔑 Internet Archive credentials
+  // 🔑 Internet Archive Credentials
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
 
@@ -36,10 +37,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-  /// Upload image to Internet Archive
+  /// Upload thumbnail to Internet Archive
   Future<String?> _uploadToInternetArchive(File file) async {
     try {
-      final identifier = "course_${DateTime.now().millisecondsSinceEpoch}";
+      final identifier = "subcourse_${DateTime.now().millisecondsSinceEpoch}";
       final fileName = file.uri.pathSegments.last;
 
       final url = Uri.parse("https://s3.us.archive.org/$identifier/$fileName");
@@ -67,9 +68,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-  Future<void> _saveCourse() async {
+  Future<void> _saveSubcourse() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      setState(() => _isLoading = true); // ✅ Start loading
       try {
         String? uploadedUrl;
 
@@ -80,19 +81,19 @@ class _AddCoursePageState extends State<AddCoursePage> {
           }
         }
 
-        await Supabase.instance.client.from("courses").insert({
+        await Supabase.instance.client.from("subcourses").insert({
           "title": titleController.text.trim(),
           "description": descController.text.trim(),
           "price": int.tryParse(priceController.text) ?? 0,
           "host": hostController.text.trim(),
           "validity_months": int.tryParse(validityController.text) ?? 0,
           "Thumbnail": uploadedUrl ?? "",
-          "purchase_count": 0,
+          "course_id": widget.courseId,
         });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Course saved successfully!")),
+            const SnackBar(content: Text("✅ Subcourse saved successfully!")),
           );
           Navigator.pop(context, true);
         }
@@ -103,7 +104,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
           );
         }
       } finally {
-        if (mounted) setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false); // ✅ Stop loading
       }
     }
   }
@@ -142,7 +143,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text("➕ Add Course"),
+        title: const Text("➕ Add Subcourse"),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -173,15 +174,13 @@ class _AddCoursePageState extends State<AddCoursePage> {
                       child: _thumbnailImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.file(_thumbnailImage!,
-                                  fit: BoxFit.cover),
+                              child: Image.file(_thumbnailImage!, fit: BoxFit.cover),
                             )
                           : const Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.image,
-                                      size: 50, color: Colors.grey),
+                                  Icon(Icons.image, size: 50, color: Colors.grey),
                                   SizedBox(height: 8),
                                   Text("Tap to pick thumbnail"),
                                 ],
@@ -195,8 +194,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   const SizedBox(height: 14),
                   _buildTextField(descController, "Description", maxLines: 3),
                   const SizedBox(height: 14),
-                  _buildTextField(priceController, "Price",
-                      type: TextInputType.number),
+                  _buildTextField(priceController, "Price", type: TextInputType.number),
                   const SizedBox(height: 14),
                   _buildTextField(hostController, "Host"),
                   const SizedBox(height: 14),
@@ -207,7 +205,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveCourse,
+                      onPressed: _isLoading ? null : _saveSubcourse, // ✅ disable while loading
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -231,7 +229,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                                 Icon(Icons.save),
                                 SizedBox(width: 8),
                                 Text(
-                                  "Save Course",
+                                  "Save Subcourse",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

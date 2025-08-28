@@ -394,9 +394,12 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+       backgroundColor: theme.colorScheme.surface, 
+      //backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.1),
       appBar: AppBar(
         title: const Text("➕ Add Subcourse"),
+         backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -478,6 +481,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                                   "Save Subcourse",
                                   style: theme.textTheme.labelLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary
                                   ),
                                 ),
                               ],

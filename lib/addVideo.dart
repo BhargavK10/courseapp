@@ -964,7 +964,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
                   ListTile(
                     leading: const Icon(Icons.video_library),
                     title: Text(
-                      _videoFile == null ? "Pick a Video" : "Video Selected",
+                      _videoFile == null ? "Pick a Video" : "Video Selected", style:TextStyle(color:theme.colorScheme.onSurfaceVariant,) 
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.upload_file),
@@ -978,7 +978,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
                     title: Text(
                       _thumbnailFile == null
                           ? "Pick Thumbnail"
-                          : "Thumbnail Selected",
+                          : "Thumbnail Selected",style:TextStyle(color:theme.colorScheme.onSurfaceVariant,)
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.upload_file),
@@ -988,7 +988,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
                   const SizedBox(height: 20),
 
                   SwitchListTile(
-                    title: const Text("Paid Video"),
+                    title: Text("Paid Video",style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                     subtitle: Text(
                       _isPaid
                           ? "Users must purchase to watch"

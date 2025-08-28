@@ -360,6 +360,7 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
                       subcourse["title"] ?? "Untitled Subcourse",
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -466,13 +467,17 @@ class _SubcourseManagePageState extends State<SubcourseManagePage> {
                               video["title"] ?? "Untitled",
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary
                               ),
                             ),
                             subtitle: Text(
                               video["description"] ?? "No description",
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.surface.withOpacity(0.6),
+                      ),
+                             // style: theme.textTheme.bodyMedium,
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,

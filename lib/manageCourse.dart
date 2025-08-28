@@ -330,13 +330,14 @@ class _CourseManagePageState extends State<CourseManagePage> {
                       course["title"] ?? "Untitled Course",
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       course["description"] ?? "No description available",
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurfaceVariant
                       ),
                     ),
                   ],
@@ -434,6 +435,8 @@ class _CourseManagePageState extends State<CourseManagePage> {
                               sub["title"] ?? "Untitled",
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+
                               ),
                             ),
                             subtitle: Text(

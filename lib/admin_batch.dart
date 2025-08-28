@@ -384,7 +384,7 @@ class _AdminBatchPageState extends State<AdminBatchPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
               onPressed: _showAddBatchDialog,
               icon: Icon(Icons.add, color: colors.onPrimary),

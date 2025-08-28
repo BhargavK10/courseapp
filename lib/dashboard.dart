@@ -506,8 +506,9 @@
 
 
 import 'package:courseapp/addcourse.dart';
+import 'package:courseapp/admin_batch.dart';
 import 'package:courseapp/attendancedashboard.dart';
-import 'package:courseapp/drawermenu.dart';
+//import 'package:courseapp/notUsed/drawermenu.dart';
 import 'package:courseapp/main.dart';
 //import 'package:courseapp/topbar.dart';
 import 'package:courseapp/manageCourse.dart';
@@ -580,7 +581,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ],
       ),
-      drawer: const DrawerMenu(),
+     // drawer: const DrawerMenu(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -759,6 +760,58 @@ class _DashboardState extends State<Dashboard> {
                       Expanded(
                         child: Text(
                           "Attendance",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 18,
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            // Assign batch Section
+            Card(
+              color: theme.colorScheme.secondaryContainer.withOpacity(0.3),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AdminBatchPage(),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: theme.colorScheme.secondaryContainer,
+                        radius: 28,
+                        child: Icon(
+                          Icons.bar_chart,
+                          size: 30,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          "Assign Batch",
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

@@ -208,6 +208,7 @@ class _AllCoursesPageState extends State<AllCoursesPage> {
                             course["title"] ?? "Untitled",
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                           subtitle: Text(

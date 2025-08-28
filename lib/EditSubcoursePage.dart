@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditSubcoursePage extends StatefulWidget {
-  final Map<String, dynamic> subcourse; 
+  final Map<String, dynamic> subcourse;
 
   const EditSubcoursePage({super.key, required this.subcourse});
 
@@ -34,12 +34,21 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
   void initState() {
     super.initState();
     // ✅ Pre-fill controllers with existing data
-    titleController = TextEditingController(text: widget.subcourse['title'] ?? '');
-    descController = TextEditingController(text: widget.subcourse['description'] ?? '');
-    priceController = TextEditingController(text: widget.subcourse['price']?.toString() ?? '');
-    hostController = TextEditingController(text: widget.subcourse['host'] ?? '');
-    validityController =
-        TextEditingController(text: widget.subcourse['validity_months']?.toString() ?? '');
+    titleController = TextEditingController(
+      text: widget.subcourse['title'] ?? '',
+    );
+    descController = TextEditingController(
+      text: widget.subcourse['description'] ?? '',
+    );
+    priceController = TextEditingController(
+      text: widget.subcourse['price']?.toString() ?? '',
+    );
+    hostController = TextEditingController(
+      text: widget.subcourse['host'] ?? '',
+    );
+    validityController = TextEditingController(
+      text: widget.subcourse['validity_months']?.toString() ?? '',
+    );
   }
 
   Future<void> _pickThumbnail() async {
@@ -70,7 +79,9 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
       if (response.statusCode == 200) {
         return "https://archive.org/download/$identifier/$fileName";
       } else {
-        debugPrint("❌ IA Upload failed: ${response.statusCode} ${response.body}");
+        debugPrint(
+          "❌ IA Upload failed: ${response.statusCode} ${response.body}",
+        );
         return null;
       }
     } catch (e) {
@@ -86,6 +97,7 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
       try {
         String? uploadedUrl = widget.subcourse['Thumbnail'];
 
+        // ✅ Upload new thumbnail if chosen
         if (_thumbnailImage != null) {
           uploadedUrl = await _uploadToInternetArchive(_thumbnailImage!);
           if (uploadedUrl == null) {
@@ -93,7 +105,16 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
           }
         }
 
-        await Supabase.instance.client
+        // 🔎 Debug ID
+        debugPrint(
+          "🟢 Subcourse ID from widget: ${widget.subcourse['id']} "
+          "(${widget.subcourse['id'].runtimeType})",
+        );
+
+        final subcourseId = widget.subcourse['id'];
+
+        // ⚡ Update without .select() (RLS can block SELECT even if UPDATE worked)
+        final response = await Supabase.instance.client
             .from("subcourses")
             .update({
               "title": titleController.text.trim(),
@@ -103,19 +124,35 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
               "validity_months": int.tryParse(validityController.text) ?? 0,
               "Thumbnail": uploadedUrl ?? "",
             })
-            .eq("id", widget.subcourse['id']); 
+            .eq("id", subcourseId)
+            .select(); // 👈 returns updated row
+
+        debugPrint("🟢 Update response: $response");
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Subcourse updated successfully!")),
-          );
-          Navigator.pop(context, true);
+          if (response == null || (response is List && response.isEmpty)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "⚠️ No rows updated. Wrong ID or blocked by RLS.",
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("✅ Subcourse updated successfully!"),
+              ),
+            );
+            Navigator.pop(context, true);
+          }
         }
       } catch (e) {
+        debugPrint("❌ Exception in update: $e");
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("❌ Error: $e")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -138,9 +175,7 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
         labelText: label,
         filled: true,
         fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Colors.blue, width: 2),
@@ -187,27 +222,36 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
                       child: _thumbnailImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.file(_thumbnailImage!, fit: BoxFit.cover),
+                              child: Image.file(
+                                _thumbnailImage!,
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : (widget.subcourse['Thumbnail'] != null &&
-                                  widget.subcourse['Thumbnail'].toString().isNotEmpty)
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Image.network(
-                                    widget.subcourse['Thumbnail'],
-                                    fit: BoxFit.cover,
+                                widget.subcourse['Thumbnail']
+                                    .toString()
+                                    .isNotEmpty)
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                widget.subcourse['Thumbnail'],
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.image,
+                                    size: 50,
+                                    color: Colors.grey,
                                   ),
-                                )
-                              : const Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.image, size: 50, color: Colors.grey),
-                                      SizedBox(height: 8),
-                                      Text("Tap to change thumbnail"),
-                                    ],
-                                  ),
-                                ),
+                                  SizedBox(height: 8),
+                                  Text("Tap to change thumbnail"),
+                                ],
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -216,12 +260,19 @@ class _EditSubcoursePageState extends State<EditSubcoursePage> {
                   const SizedBox(height: 14),
                   _buildTextField(descController, "Description", maxLines: 3),
                   const SizedBox(height: 14),
-                  _buildTextField(priceController, "Price", type: TextInputType.number),
+                  _buildTextField(
+                    priceController,
+                    "Price",
+                    type: TextInputType.number,
+                  ),
                   const SizedBox(height: 14),
                   _buildTextField(hostController, "Host"),
                   const SizedBox(height: 14),
-                  _buildTextField(validityController, "Validity (months)",
-                      type: TextInputType.number),
+                  _buildTextField(
+                    validityController,
+                    "Validity (months)",
+                    type: TextInputType.number,
+                  ),
                   const SizedBox(height: 20),
 
                   SizedBox(

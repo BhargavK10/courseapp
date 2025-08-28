@@ -1,3 +1,255 @@
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:supabase_flutter/supabase_flutter.dart';
+
+// class AddSubcoursePage extends StatefulWidget {
+//   final String courseId;
+
+//   const AddSubcoursePage({super.key, required this.courseId});
+
+//   @override
+//   State<AddSubcoursePage> createState() => _AddSubcoursePageState();
+// }
+
+// class _AddSubcoursePageState extends State<AddSubcoursePage> {
+//   final _formKey = GlobalKey<FormState>();
+//   final titleController = TextEditingController();
+//   final descController = TextEditingController();
+//   final priceController = TextEditingController();
+//   final hostController = TextEditingController();
+//   final validityController = TextEditingController();
+
+//   File? _thumbnailImage;
+//   final ImagePicker _picker = ImagePicker();
+
+//   bool _isLoading = false; // ✅ Loading flag
+
+//   // 🔑 Internet Archive Credentials
+//   final String accessKey = "wAXCfd5mHnqqL254";
+//   final String secretKey = "aPFJPWYfZrlHpnIA";
+
+//   Future<void> _pickThumbnail() async {
+//     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+//     if (pickedFile != null) {
+//       setState(() => _thumbnailImage = File(pickedFile.path));
+//     }
+//   }
+
+//   /// Upload thumbnail to Internet Archive
+//   Future<String?> _uploadToInternetArchive(File file) async {
+//     try {
+//       final identifier = "subcourse_${DateTime.now().millisecondsSinceEpoch}";
+//       final fileName = file.uri.pathSegments.last;
+
+//       final url = Uri.parse("https://s3.us.archive.org/$identifier/$fileName");
+//       final bytes = await file.readAsBytes();
+
+//       final response = await http.put(
+//         url,
+//         headers: {
+//           "authorization": "LOW $accessKey:$secretKey",
+//           "x-archive-auto-make-bucket": "1",
+//           "Content-Type": "image/jpeg",
+//         },
+//         body: bytes,
+//       );
+
+//       if (response.statusCode == 200) {
+//         return "https://archive.org/download/$identifier/$fileName";
+//       } else {
+//         debugPrint("❌ IA Upload failed: ${response.statusCode} ${response.body}");
+//         return null;
+//       }
+//     } catch (e) {
+//       debugPrint("❌ IA Exception: $e");
+//       return null;
+//     }
+//   }
+
+//   Future<void> _saveSubcourse() async {
+//     if (_formKey.currentState!.validate()) {
+//       setState(() => _isLoading = true); // ✅ Start loading
+//       try {
+//         String? uploadedUrl;
+
+//         if (_thumbnailImage != null) {
+//           uploadedUrl = await _uploadToInternetArchive(_thumbnailImage!);
+//           if (uploadedUrl == null) {
+//             throw Exception("Failed to upload thumbnail to Internet Archive");
+//           }
+//         }
+
+//         await Supabase.instance.client.from("subcourses").insert({
+//           "title": titleController.text.trim(),
+//           "description": descController.text.trim(),
+//           "price": int.tryParse(priceController.text) ?? 0,
+//           "host": hostController.text.trim(),
+//           "validity_months": int.tryParse(validityController.text) ?? 0,
+//           "Thumbnail": uploadedUrl ?? "",
+//           "course_id": widget.courseId,
+//         });
+
+//         if (mounted) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             const SnackBar(content: Text("✅ Subcourse saved successfully!")),
+//           );
+//           Navigator.pop(context, true);
+//         }
+//       } catch (e) {
+//         if (mounted) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text("❌ Error: $e")),
+//           );
+//         }
+//       } finally {
+//         if (mounted) setState(() => _isLoading = false); // ✅ Stop loading
+//       }
+//     }
+//   }
+
+//   Widget _buildTextField(
+//     TextEditingController controller,
+//     String label, {
+//     TextInputType type = TextInputType.text,
+//     int maxLines = 1,
+//     bool required = false,
+//   }) {
+//     return TextFormField(
+//       controller: controller,
+//       keyboardType: type,
+//       maxLines: maxLines,
+//       decoration: InputDecoration(
+//         labelText: label,
+//         filled: true,
+//         fillColor: Colors.grey.shade100,
+//         border: OutlineInputBorder(
+//           borderRadius: BorderRadius.circular(14),
+//         ),
+//         focusedBorder: OutlineInputBorder(
+//           borderRadius: BorderRadius.circular(14),
+//           borderSide: const BorderSide(color: Colors.blue, width: 2),
+//         ),
+//       ),
+//       validator: required
+//           ? (v) => v == null || v.isEmpty ? "Please enter $label" : null
+//           : null,
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.grey.shade100,
+//       appBar: AppBar(
+//         title: const Text("➕ Add Subcourse"),
+//         backgroundColor: Colors.blue,
+//         foregroundColor: Colors.white,
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(18),
+//         child: Card(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(18),
+//           ),
+//           elevation: 4,
+//           child: Padding(
+//             padding: const EdgeInsets.all(18),
+//             child: Form(
+//               key: _formKey,
+//               child: Column(
+//                 children: [
+//                   // Thumbnail picker
+//                   GestureDetector(
+//                     onTap: _pickThumbnail,
+//                     child: Container(
+//                       height: 150,
+//                       width: double.infinity,
+//                       decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(14),
+//                         border: Border.all(color: Colors.grey.shade400),
+//                         color: Colors.grey.shade200,
+//                       ),
+//                       child: _thumbnailImage != null
+//                           ? ClipRRect(
+//                               borderRadius: BorderRadius.circular(14),
+//                               child: Image.file(_thumbnailImage!, fit: BoxFit.cover),
+//                             )
+//                           : const Center(
+//                               child: Column(
+//                                 mainAxisAlignment: MainAxisAlignment.center,
+//                                 children: [
+//                                   Icon(Icons.image, size: 50, color: Colors.grey),
+//                                   SizedBox(height: 8),
+//                                   Text("Tap to pick thumbnail"),
+//                                 ],
+//                               ),
+//                             ),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 20),
+
+//                   _buildTextField(titleController, "Title", required: true),
+//                   const SizedBox(height: 14),
+//                   _buildTextField(descController, "Description", maxLines: 3),
+//                   const SizedBox(height: 14),
+//                   _buildTextField(priceController, "Price", type: TextInputType.number),
+//                   const SizedBox(height: 14),
+//                   _buildTextField(hostController, "Host"),
+//                   const SizedBox(height: 14),
+//                   _buildTextField(validityController, "Validity (months)",
+//                       type: TextInputType.number),
+//                   const SizedBox(height: 20),
+
+//                   SizedBox(
+//                     width: double.infinity,
+//                     child: ElevatedButton(
+//                       onPressed: _isLoading ? null : _saveSubcourse, // ✅ disable while loading
+//                       style: ElevatedButton.styleFrom(
+//                         backgroundColor: Colors.blue,
+//                         foregroundColor: Colors.white,
+//                         padding: const EdgeInsets.symmetric(vertical: 14),
+//                         shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(14),
+//                         ),
+//                       ),
+//                       child: _isLoading
+//                           ? const SizedBox(
+//                               height: 22,
+//                               width: 22,
+//                               child: CircularProgressIndicator(
+//                                 color: Colors.white,
+//                                 strokeWidth: 2,
+//                               ),
+//                             )
+//                           : const Row(
+//                               mainAxisAlignment: MainAxisAlignment.center,
+//                               children: [
+//                                 Icon(Icons.save),
+//                                 SizedBox(width: 8),
+//                                 Text(
+//                                   "Save Subcourse",
+//                                   style: TextStyle(
+//                                     fontSize: 16,
+//                                     fontWeight: FontWeight.bold,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,7 +289,6 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
     }
   }
 
-  /// Upload thumbnail to Internet Archive
   Future<String?> _uploadToInternetArchive(File file) async {
     try {
       final identifier = "subcourse_${DateTime.now().millisecondsSinceEpoch}";
@@ -116,6 +367,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
     int maxLines = 1,
     bool required = false,
   }) {
+    final theme = Theme.of(context);
     return TextFormField(
       controller: controller,
       keyboardType: type,
@@ -123,13 +375,13 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
       ),
       validator: required
@@ -140,12 +392,11 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.1),
       appBar: AppBar(
         title: const Text("➕ Add Subcourse"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -168,21 +419,22 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.grey.shade400),
-                        color: Colors.grey.shade200,
+                        border: Border.all(color: theme.dividerColor),
+                        color: theme.colorScheme.surfaceVariant,
                       ),
                       child: _thumbnailImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(14),
                               child: Image.file(_thumbnailImage!, fit: BoxFit.cover),
                             )
-                          : const Center(
+                          : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.image, size: 50, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text("Tap to pick thumbnail"),
+                                  Icon(Icons.image, size: 50, color: theme.iconTheme.color),
+                                  const SizedBox(height: 8),
+                                  Text("Tap to pick thumbnail",
+                                      style: theme.textTheme.bodyMedium),
                                 ],
                               ),
                             ),
@@ -198,8 +450,7 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                   const SizedBox(height: 14),
                   _buildTextField(hostController, "Host"),
                   const SizedBox(height: 14),
-                  _buildTextField(validityController, "Validity (months)",
-                      type: TextInputType.number),
+                  _buildTextField(validityController, "Validity (months)", type: TextInputType.number),
                   const SizedBox(height: 20),
 
                   SizedBox(
@@ -207,8 +458,6 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _saveSubcourse, 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -218,20 +467,16 @@ class _AddSubcoursePageState extends State<AddSubcoursePage> {
                           ? const SizedBox(
                               height: 22,
                               width: 22,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Row(
+                          : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.save),
-                                SizedBox(width: 8),
+                                const Icon(Icons.save),
+                                const SizedBox(width: 8),
                                 Text(
                                   "Save Subcourse",
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  style: theme.textTheme.labelLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

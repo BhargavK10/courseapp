@@ -136,8 +136,6 @@ class _EditCoursePageState extends State<EditCoursePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Course"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -228,14 +226,13 @@ class _EditCoursePageState extends State<EditCoursePage> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _updateCourse,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator()
                     : const Text(
                         "Save Changes",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16),
                       ),
               ),
             ],

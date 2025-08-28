@@ -43,7 +43,7 @@ dependencies:
   cloudinary_api: ^1.1.1
   cloudinary_url_gen: ^1.8.0
   http: ^1.2.0
-  
+  provider: ^6.1.5+1
 
 
 dev_dependencies:

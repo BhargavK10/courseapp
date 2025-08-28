@@ -495,16 +495,282 @@ class _AddVideoPageState extends State<AddVideoPage> {
   }
 }*/
 
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'dart:convert';
+
+// class AddVideoPage extends StatefulWidget {
+//   final String subcourseId;  // ✅ use String for UUID
+//   final String courseId;     // ✅ if you also need courseId separately
+
+//   const AddVideoPage({
+//     Key? key,
+//     required this.subcourseId,
+//     required this.courseId,
+//   }) : super(key: key);
+
+//   @override
+//   State<AddVideoPage> createState() => _AddVideoPageState();
+// }
+
+
+// class _AddVideoPageState extends State<AddVideoPage> {
+//   final _titleController = TextEditingController();
+//   final _descController = TextEditingController();
+
+//   File? _videoFile;
+//   File? _thumbnailFile;
+//   bool _isPaid = false;
+//   bool _isUploading = false;
+
+//   final _formKey = GlobalKey<FormState>();
+//   final picker = ImagePicker();
+
+//   // 🔑 Internet Archive Credentials (replace with yours)
+//   final String accessKey = "wAXCfd5mHnqqL254";
+//   final String secretKey = "aPFJPWYfZrlHpnIA";
+
+//   @override
+//   void dispose() {
+//     _titleController.dispose();
+//     _descController.dispose();
+//     super.dispose();
+//   }
+
+//   Future<void> _pickVideo() async {
+//     final picked = await picker.pickVideo(source: ImageSource.gallery);
+//     if (picked != null) {
+//       setState(() => _videoFile = File(picked.path));
+//     }
+//   }
+
+//   Future<void> _pickThumbnail() async {
+//     final picked = await picker.pickImage(source: ImageSource.gallery);
+//     if (picked != null) {
+//       setState(() => _thumbnailFile = File(picked.path));
+//     }
+//   }
+
+//   Future<String?> _uploadToInternetArchive(
+//     File file, {
+//     bool isVideo = false,
+//   }) async {
+//     try {
+//       final identifier = "flutter_${DateTime.now().millisecondsSinceEpoch}";
+//       final fileName = file.uri.pathSegments.last;
+
+//       final url = Uri.parse("https://s3.us.archive.org/$identifier/$fileName");
+
+//       final bytes = await file.readAsBytes();
+
+//       final response = await http.put(
+//         url,
+//         headers: {
+//           "authorization": "LOW $accessKey:$secretKey",
+//           "x-archive-auto-make-bucket": "1", // auto create bucket if not exists
+//           "Content-Type": isVideo ? "video/mp4" : "image/jpeg",
+//         },
+//         body: bytes,
+//       );
+
+//       if (response.statusCode == 200) {
+//         return "https://archive.org/download/$identifier/$fileName";
+//       } else {
+//         debugPrint("IA Upload failed: ${response.statusCode} ${response.body}");
+//         return null;
+//       }
+//     } catch (e) {
+//       debugPrint("IA Exception: $e");
+//       return null;
+//     }
+//   }
+
+//   Future<void> _addVideo() async {
+//     if (!_formKey.currentState!.validate() || _videoFile == null) {
+//       ScaffoldMessenger.of(
+//         context,
+//       ).showSnackBar(const SnackBar(content: Text("Please select a video")));
+//       return;
+//     }
+
+//     setState(() => _isUploading = true);
+
+//     try {
+//       // Upload video & thumbnail to Internet Archive
+//       final videoUrl = await _uploadToInternetArchive(
+//         _videoFile!,
+//         isVideo: true,
+//       );
+//       final thumbUrl = _thumbnailFile != null
+//           ? await _uploadToInternetArchive(_thumbnailFile!)
+//           : null;
+
+//       if (videoUrl == null) throw "Video upload failed";
+
+//       // Get next index from Supabase
+//       // Get next index from Supabase
+//       final maxIndexResponse = await Supabase.instance.client
+//           .from('Videos')
+//           .select('index')
+//           .eq('subcourse_id', widget.subcourseId) // ✅ changed to subcourse_id
+//           .order('index', ascending: false)
+//           .limit(1);
+
+//       int nextIndex = 1;
+//       if (maxIndexResponse.isNotEmpty) {
+//         nextIndex = (maxIndexResponse.first['index'] as int) + 1;
+//       }
+
+//       // Save video metadata in Supabase
+//       await Supabase.instance.client.from('Videos').insert({
+//         'title': _titleController.text,
+//         'description': _descController.text,
+//         'video_url': videoUrl,
+//         'subcourse_id': widget.subcourseId, // ✅ use subcourse_id
+//         'is_paid': _isPaid,
+//         'thumbnail': thumbUrl,
+//         'index': nextIndex,
+//       });
+
+//       if (mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("✅ Video Added Successfully!")),
+//         );
+//         Navigator.pop(context, true);
+//       }
+//     } catch (e) {
+//       if (mounted) {
+//         ScaffoldMessenger.of(
+//           context,
+//         ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
+//       }
+//     } finally {
+//       if (mounted) setState(() => _isUploading = false);
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.grey.shade100,
+//       appBar: AppBar(
+//         title: const Text("🎬 Add Video"),
+//         backgroundColor: Colors.blue,
+//         foregroundColor: Colors.white,
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(18),
+//         child: Card(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(18),
+//           ),
+//           elevation: 4,
+//           child: Padding(
+//             padding: const EdgeInsets.all(18),
+//             child: Form(
+//               key: _formKey,
+//               child: Column(
+//                 children: [
+//                   TextFormField(
+//                     controller: _titleController,
+//                     decoration: const InputDecoration(
+//                       labelText: "Video Title",
+//                       prefixIcon: Icon(Icons.title),
+//                     ),
+//                     validator: (v) =>
+//                         v == null || v.isEmpty ? "Enter video title" : null,
+//                   ),
+//                   const SizedBox(height: 14),
+
+//                   TextFormField(
+//                     controller: _descController,
+//                     decoration: const InputDecoration(
+//                       labelText: "Description",
+//                       prefixIcon: Icon(Icons.description),
+//                     ),
+//                     maxLines: 2,
+//                   ),
+//                   const SizedBox(height: 14),
+
+//                   ListTile(
+//                     leading: const Icon(Icons.video_library),
+//                     title: Text(
+//                       _videoFile == null ? "Pick a Video" : "Video Selected",
+//                     ),
+//                     trailing: IconButton(
+//                       icon: const Icon(Icons.upload_file),
+//                       onPressed: _pickVideo,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 14),
+
+//                   ListTile(
+//                     leading: const Icon(Icons.image),
+//                     title: Text(
+//                       _thumbnailFile == null
+//                           ? "Pick Thumbnail"
+//                           : "Thumbnail Selected",
+//                     ),
+//                     trailing: IconButton(
+//                       icon: const Icon(Icons.upload_file),
+//                       onPressed: _pickThumbnail,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 20),
+
+//                   SwitchListTile(
+//                     title: const Text("Paid Video"),
+//                     subtitle: Text(
+//                       _isPaid
+//                           ? "Users must purchase to watch"
+//                           : "Free to watch",
+//                     ),
+//                     value: _isPaid,
+//                     onChanged: (val) => setState(() => _isPaid = val),
+//                     activeColor: Colors.green,
+//                   ),
+//                   const SizedBox(height: 28),
+
+//                   _isUploading
+//                       ? const CircularProgressIndicator()
+//                       : SizedBox(
+//                           width: double.infinity,
+//                           child: ElevatedButton.icon(
+//                             onPressed: _addVideo,
+//                             icon: const Icon(Icons.save),
+//                             label: const Text(
+//                               "Save Video",
+//                               style: TextStyle(
+//                                 fontSize: 18,
+//                                 fontWeight: FontWeight.bold,
+//                               ),
+//                             ),
+//                           ),
+//                         ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:convert';
 
 class AddVideoPage extends StatefulWidget {
-  final String subcourseId;  // ✅ use String for UUID
-  final String courseId;     // ✅ if you also need courseId separately
+  final String subcourseId;  
+  final String courseId;     
 
   const AddVideoPage({
     Key? key,
@@ -515,7 +781,6 @@ class AddVideoPage extends StatefulWidget {
   @override
   State<AddVideoPage> createState() => _AddVideoPageState();
 }
-
 
 class _AddVideoPageState extends State<AddVideoPage> {
   final _titleController = TextEditingController();
@@ -529,7 +794,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
   final _formKey = GlobalKey<FormState>();
   final picker = ImagePicker();
 
-  // 🔑 Internet Archive Credentials (replace with yours)
+  // 🔑 Internet Archive Credentials
   final String accessKey = "wAXCfd5mHnqqL254";
   final String secretKey = "aPFJPWYfZrlHpnIA";
 
@@ -570,7 +835,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         url,
         headers: {
           "authorization": "LOW $accessKey:$secretKey",
-          "x-archive-auto-make-bucket": "1", // auto create bucket if not exists
+          "x-archive-auto-make-bucket": "1",
           "Content-Type": isVideo ? "video/mp4" : "image/jpeg",
         },
         body: bytes,
@@ -599,7 +864,6 @@ class _AddVideoPageState extends State<AddVideoPage> {
     setState(() => _isUploading = true);
 
     try {
-      // Upload video & thumbnail to Internet Archive
       final videoUrl = await _uploadToInternetArchive(
         _videoFile!,
         isVideo: true,
@@ -610,12 +874,10 @@ class _AddVideoPageState extends State<AddVideoPage> {
 
       if (videoUrl == null) throw "Video upload failed";
 
-      // Get next index from Supabase
-      // Get next index from Supabase
       final maxIndexResponse = await Supabase.instance.client
           .from('Videos')
           .select('index')
-          .eq('subcourse_id', widget.subcourseId) // ✅ changed to subcourse_id
+          .eq('subcourse_id', widget.subcourseId)
           .order('index', ascending: false)
           .limit(1);
 
@@ -624,12 +886,11 @@ class _AddVideoPageState extends State<AddVideoPage> {
         nextIndex = (maxIndexResponse.first['index'] as int) + 1;
       }
 
-      // Save video metadata in Supabase
       await Supabase.instance.client.from('Videos').insert({
         'title': _titleController.text,
         'description': _descController.text,
         'video_url': videoUrl,
-        'subcourse_id': widget.subcourseId, // ✅ use subcourse_id
+        'subcourse_id': widget.subcourseId,
         'is_paid': _isPaid,
         'thumbnail': thumbUrl,
         'index': nextIndex,
@@ -654,12 +915,14 @@ class _AddVideoPageState extends State<AddVideoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // 👈 pick colors dynamically
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: theme.colorScheme.surface, // instead of grey
       appBar: AppBar(
         title: const Text("🎬 Add Video"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -730,7 +993,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
                     ),
                     value: _isPaid,
                     onChanged: (val) => setState(() => _isPaid = val),
-                    activeColor: Colors.green,
+                    activeColor: theme.colorScheme.secondary, // no hardcoded green
                   ),
                   const SizedBox(height: 28),
 
